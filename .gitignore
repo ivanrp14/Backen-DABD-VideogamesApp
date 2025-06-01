@@ -1,4 +1,50 @@
-{
-  "sobrenom": "miguel1234",
-  "contrasenya": "1234"
-}
+# Entornos virtuales
+venv/
+env/
+.venv/
+.env/
+
+# Archivos de configuración sensibles
+*.env
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de log
+*.log
+
+# Configuración de bases de datos SQLite (por si acaso)
+*.sqlite3
+*.db
+
+# Archivos de coverage y test
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Archivos de IDEs y editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos generados de Uvicorn/Starlette
+instance/
+*.pid
+
+# Archivos de migraciones (si usas Alembic u otros)
+migrations/
+
+# Otros
+dist/
+build/
+*.egg-info/
