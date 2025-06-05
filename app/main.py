@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.endpoints import usuari  # asegúrate que este archivo existe y no da error al importar
+from app.router import usuari, elementvenda
 from app.database import engine, Base
 
 print("Iniciando app...")
@@ -8,4 +8,5 @@ app = FastAPI()
 
 
 app.include_router(usuari.router, prefix="/api/auth", tags=["usuari"])
+app.include_router(elementvenda.router, prefix="/api/vendes", tags=["venda"])
 

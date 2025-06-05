@@ -3,6 +3,15 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 import os
 from app.config import DATABASE_URL
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # Cargar variables de entorno desde .env
 load_dotenv()
 
