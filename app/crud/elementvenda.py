@@ -1,62 +1,32 @@
 # crud/elementvenda.py
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from app.models import elementvenda as models
-from app.schemas.elementvenda import ElementVendaCreate, ElementVendaUpdate
+from app.models.elementvenda import ElementVenda, Videojoc, DLC 
+from app.schemas.elementvenda import ElementVendaBase
 
-def get_element(db: Session, element_id: int):
-    return db.query(models.ElementVenda).filter(models.ElementVenda.id == element_id).first()
-
-def create_element(db: Session, element: ElementVendaCreate):
-    new_element = models.ElementVenda(
-        nom=element.nom,
-        descripcio=element.descripcio,
-        preu=element.preu,
-        datallancament=element.datallancament,
-        qualificacioedat=element.qualificacioedat,
-        desenvolupador=element.desenvolupador,
-    )
-    db.add(new_element)
-    db.flush()  # Para obtener el id del new_element
-
-    if element.tipus == 'videojoc':
-        videojoc = models.Videojoc(
-            elementvendaid=new_element.id,
-            genere=element.genere,
-            multijugador=element.multijugador,
-            tempsestimat=element.tempsestimat
-        )
-        db.add(videojoc)
-
-    elif element.tipus == 'dlc':
-        dlc = models.DLC(
-            elementvendaid=new_element.id,
-            tipusdlc=element.tipusdlc,
-            esgratuït=element.esgratuït,
-            videojocbaseid=element.videojocbaseid
-        )
-        db.add(dlc)
-    else:
-        raise ValueError("Tipus must be 'videojoc' or 'dlc'")
-
-    db.commit()
-    db.refresh(new_element)
-    return new_element
-
-def update_element(db: Session, element_id: int, element_data: ElementVendaUpdate):
-    element = db.query(models.ElementVenda).filter(models.ElementVenda.id == element_id).first()
+def get_videojoc(db: Session, elementvenda_id: int):
+    element = db.query(ElementVenda).filter(ElementVenda.id == elementvenda_id).first()
     if not element:
-        return None
-    for field, value in element_data.dict(exclude_unset=True).items():
-        setattr(element, field, value)
-    db.commit()
-    db.refresh(element)
-    return element
+        raise HTTPException(status_code=404, detail="Element no trobat")
+    if element.tipus != "videojoc":
+        raise HTTPException(status_code=400, detail="L'element no és un videojoc")
+    
+    videojoc = db.query(Videojoc).filter(Videojoc.elementvendaid == elementvenda_id).first()
+    return {"id": element.id, "nom": element.nom, "descripcio": element.descripcio, "preu": element.preu,
+            "datallancament": element.datallancament, "qualificacioedat": element.qualificacioedat,
+            "desenvolupador": element.desenvolupador,
+            "genere": videojoc.genere, "multijugador": videojoc.multijugador, "tempsestimat": videojoc.tempsestimat}
 
-def delete_element(db: Session, element_id: int):
-    element = db.query(models.ElementVenda).filter(models.ElementVenda.id == element_id).first()
+def get_dlc(db: Session, elementvenda_id: int):
+    element = db.query(ElementVenda).filter(ElementVenda.id == elementvenda_id).first()
     if not element:
-        return False
-    db.delete(element)
-    db.commit()
-    return True
+        raise HTTPException(status_code=404, detail="Element no trobat")
+    if element.tipus != "dlc":
+        raise HTTPException(status_code=400, detail="L'element no és un DLC")
+    
+    dlc = db.query(DLC).filter(DLC.elementvendaid == elementvenda_id).first()
+    return {"id": element.id, "nom": element.nom, "descripcio": element.descripcio, "preu": element.preu,
+            "datallancament": element.datallancament, "qualificacioedat": element.qualificacioedat,
+            "desenvolupador": element.desenvolupador,
+            "tipusdlc": dlc.tipusdlc, "esgratuit": dlc.esgratuit, "videojocbaseid": dlc.videojocbaseid}
