@@ -1,5 +1,6 @@
 # routers/videojoc.py
-from fastapi import APIRouter, Depends
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
 import app.crud.elementvenda as crud
@@ -13,13 +14,13 @@ router = APIRouter(
     tags=["Videojoc"]
 )
 
-@router.get("/{elementvenda_id}", response_model=schemas.Videojoc)
+@router.get("/id/{elementvenda_id}", response_model=schemas.Videojoc)
 def read_videojoc(elementvenda_id: int, db: Session = Depends(get_db)):
     return crud.get_videojoc(db, elementvenda_id)
 
 
 
-@router.post("/videojocs")
+@router.post("/")
 def create_videojoc(videojoc: VideojocCreate, db: Session = Depends(get_db)):
     element = ElementVenda(
         nom=videojoc.nom,
@@ -44,7 +45,7 @@ def create_videojoc(videojoc: VideojocCreate, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Videojoc creat", "id": element.id}
-@router.put("/videojocs/{videojoc_id}")
+@router.put("/{videojoc_id}")
 def update_videojoc(videojoc_id: int, videojoc_update: VideojocUpdate, db: Session = Depends(get_db)):
     element = db.query(ElementVenda).filter_by(id=videojoc_id, tipus="videojoc").first()
     if not element:
@@ -68,3 +69,13 @@ def update_videojoc(videojoc_id: int, videojoc_update: VideojocUpdate, db: Sessi
     db.commit()
 
     return {"message": "Videojoc actualitzat"}
+
+@router.get("/filtered/", response_model=List[schemas.Videojoc])
+def filter_videojocs(
+    genere: Optional[str] = Query(None, description="Gènere del videojoc"),
+    preu_min: Optional[float] = Query(None, description="Preu mínim"),
+    preu_max: Optional[float] = Query(None, description="Preu màxim"),
+    db: Session = Depends(get_db)
+):
+    videojocs = crud.filter_videojocs(db, genere=genere, preu_min=preu_min, preu_max=preu_max)
+    return videojocs

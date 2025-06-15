@@ -4,10 +4,10 @@ from app.database import get_db
 from app.models.elementvenda import ElementVenda
 
 
-router = APIRouter(prefix="/elements", tags=["elements"])
+router = APIRouter(prefix="/products", tags=["Products"])
 
 
-@router.get("/products-by-date")
+@router.get("/by-date")
 def get_products_by_date(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1),
@@ -42,7 +42,7 @@ def get_products_by_date(
         "page_size": page_size,
         "products": response
     }
-@router.delete("/product/{product_id}")
+@router.delete("/delete/{product_id}")
 def delete_product(product_id: int, db: Session = Depends(get_db)):
     element = db.query(ElementVenda).filter_by(id=product_id).first()
     if not element:

@@ -7,7 +7,10 @@ from app.database import get_db
 from app.config import SECRET_KEY, ALGORITHM
 import app.schemas.usuari as schemas, app.models.usuari as models, app.crud.usuari as crud
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/auth",
+    tags=["Autentication"]
+)
 bearer_scheme = HTTPBearer()
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -55,6 +58,6 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
         raise HTTPException(status_code=404, detail="Usuari no trobat")
     return usuari
 
-@router.get("/perfil", response_model=schemas.Usuari)
+@router.get("/get-user", response_model=schemas.Usuari)
 def perfil(current_user: models.Usuari = Depends(get_current_user)):
     return current_user
