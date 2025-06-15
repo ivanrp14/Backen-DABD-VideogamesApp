@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.router import usuari, elementvenda, videojoc, dlc
+from app.router import usuari, elementvenda, videojoc, dlc, venda
 from app.database import engine, Base
 
 print("Iniciando app...")
@@ -12,3 +12,4 @@ app.include_router(elementvenda.router)
 
 app.include_router(videojoc.router)
 app.include_router(dlc.router)
+app.include_router(venda.router)

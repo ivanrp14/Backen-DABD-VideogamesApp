@@ -12,4 +12,5 @@ class Usuari(Base):
     correuelectronic = Column(String, nullable=False, unique=True)
     datanaixement = Column(Date, nullable=False)
 
- 
+    vendes = relationship("Venda", back_populates="usuari")
+

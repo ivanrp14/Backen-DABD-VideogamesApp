@@ -16,6 +16,7 @@ class ElementVenda(Base):
 
     videojoc = relationship("Videojoc", back_populates="elementvenda", uselist=False)
     dlc = relationship("DLC", back_populates="elementvenda")  # <== CORRECCIÓ: llista
+    vendes = relationship("Venda", back_populates="elementvenda")
 
 class Videojoc(Base):
     __tablename__ = "videojoc"
