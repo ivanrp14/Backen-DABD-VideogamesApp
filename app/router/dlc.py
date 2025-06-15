@@ -1,4 +1,5 @@
 # routers/dlc.py
+from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -72,3 +73,10 @@ def update_dlc(dlc_id: int, dlc_update: DLCUpdate, db: Session = Depends(get_db)
     db.commit()
 
     return {"message": "DLC actualitzat"}
+
+
+
+@router.get("/{videojoc_id}/dlcs", response_model=List[schemas.DLC])
+def read_dlcs_of_videojoc(videojoc_id: int, db: Session = Depends(get_db)):
+    dlcs = crud.get_dlcs_by_videojoc(db, videojoc_id)
+    return dlcs

@@ -59,3 +59,30 @@ def filter_videojocs(db: Session, genere: Optional[str] = None, preu_min: Option
             "tempsestimat": videojoc.tempsestimat
         })
     return videojocs
+
+def get_dlcs_by_videojoc(db: Session, videojoc_id: int):
+    # Comprobar que el videojoc existe
+    videojoc_element = db.query(ElementVenda).filter(ElementVenda.id == videojoc_id, ElementVenda.tipus == "videojoc").first()
+    if not videojoc_element:
+        raise HTTPException(status_code=404, detail="Videojoc no trobat")
+    
+    # Obtener todos los DLCs que referencian ese videojoc
+    dlcs = db.query(DLC).filter(DLC.videojocbaseid == videojoc_id).all()
+
+    # Construir la lista de DLC con información combinada de ElementVenda y DLC
+    dlc_list = []
+    for dlc in dlcs:
+        element = db.query(ElementVenda).filter(ElementVenda.id == dlc.elementvendaid).first()
+        dlc_list.append({
+            "id": element.id,
+            "nom": element.nom,
+            "descripcio": element.descripcio,
+            "preu": element.preu,
+            "datallancament": element.datallancament,
+            "qualificacioedat": element.qualificacioedat,
+            "desenvolupador": element.desenvolupador,
+            "tipusdlc": dlc.tipusdlc,
+            "esgratuit": dlc.esgratuit,
+            "videojocbaseid": dlc.videojocbaseid
+        })
+    return dlc_list
