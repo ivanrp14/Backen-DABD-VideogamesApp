@@ -10,7 +10,7 @@ import { FaUserAstronaut } from "react-icons/fa6";
 import {  useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 // URL base del backend
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://localhost:8000'
 
 const LoginRegistro = () => {
 
@@ -56,7 +56,7 @@ const LoginRegistro = () => {
       return;
     }
 
-    const response = await fetch(`${BASE_URL}/api/auth/login`, {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ const LoginRegistro = () => {
     }
     // Hacer la solicitud de registro al backend
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +124,6 @@ const LoginRegistro = () => {
   };
 
 
-//<img src={logo} alt="Logo Petting care" className="logo" /> 
 
   return (
     <div className="login-form">
@@ -142,7 +141,7 @@ const LoginRegistro = () => {
               <FaUserAstronaut  className='icono'/>
             </div>
             <div className="input-box">
-              <input type={passwordVisible ? 'text' : 'contrasenya'} name="contrasenya" placeholder='Contraseña' required />
+              <input type={passwordVisible ? 'text' : 'password'} name="contrasenya" placeholder='Contraseña' required />
               <RiLockPasswordFill  className='icono'/>
               {passwordVisible ? <IoIosEye className='showPass' onClick={togglePasswordVisibility}/>
               : <IoIosEyeOff className='showPass' onClick={togglePasswordVisibility}/>}
@@ -173,7 +172,7 @@ const LoginRegistro = () => {
               <IoMdMail  className='icono'/>
             </div>
             <div className="input-box">
-            <input type={passwordVisible ? 'text' : 'contrasenya'} name="contrasenya" placeholder='Contraseña' required />
+            <input type={passwordVisible ? 'text' : 'password'} name="contrasenya" placeholder='Contraseña' required />
               <RiLockPasswordFill  className='icono'/>
               {passwordVisible ? <IoIosEye className='showPass' onClick={togglePasswordVisibility}/>
               : <IoIosEyeOff className='showPass' onClick={togglePasswordVisibility}/>}
