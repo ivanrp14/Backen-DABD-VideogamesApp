@@ -8,7 +8,7 @@ class Venda(Base):
     __tablename__ = 'venda'
     __table_args__ = {'schema': 'practica'}
 
-    data = Column(Date, primary_key=True, nullable=False)
+    data = Column(Date, nullable=False)
     preu = Column(Float, nullable=False)
     usuarisobrenom = Column(String, ForeignKey('practica.usuari.sobrenom', onupdate="RESTRICT", ondelete="CASCADE"), primary_key=True, nullable=False)
     elementvendaid = Column(Integer, ForeignKey('practica.elementvenda.id', onupdate="RESTRICT", ondelete="CASCADE"), primary_key=True, nullable=False)
