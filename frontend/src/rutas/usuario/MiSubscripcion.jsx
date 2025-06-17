@@ -3,9 +3,10 @@ import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import SidenavUsuari from "../../Componentes/Sidenav/UsuariSidenav";
 import Navbar from '../../Componentes/NavBar';
+import { data } from 'react-router-dom';
 const BASE_URL = 'http://localhost:8000';
 
-const Videojocs = () => {
+const MiSubscripcio = () => {
   const [rows, setRows] = useState([])
   const columns = [
     {
@@ -45,13 +46,42 @@ const Videojocs = () => {
       editable: false
     }
   ];
+  
+
+
   useEffect(() => {
+    const getSubscripcionsUsuari = async (event) => {
+  try {
+    const token = localStorage.getItem("token");
+    const sobrenom = localStorage.getItem("sobrenom");
+    if (!token) {
+      throw new Error("No hay token de acceso, inicia sesión.");
+    }
+
+    const response = await fetch(`${BASE_URL}/vendes/usuari/${sobrenom}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener las suscripciones");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
     const getVideojocs = async (event) => {
       try {
         const accessToken = localStorage.getItem("token");
         const sobrenom = localStorage.getItem("sobrenom");
-
-        const response = await fetch(`${BASE_URL}/vendes/usuari/${sobrenom}`, {
+        const id = data.id;
+        const response = await fetch(`${BASE_URL}/subscripcions/subscripcions/${id}/jocs`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -74,8 +104,10 @@ const Videojocs = () => {
       console.error(error);
     }
   };
-
+  
+  getSubscripcionsUsuari();
   getVideojocs();
+
 }, []);
   return (
     <>
@@ -84,7 +116,12 @@ const Videojocs = () => {
     <Box sx={{  display: 'flex'}}>
       <SidenavUsuari/>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <h1>Biblioteca</h1>
+        <h1>Mi subscripcion</h1>
+        <div className="subscripcio-container">
+              <p><strong>Tipo:</strong> {data.nom}</p>
+              <p><strong>Fecha de inicio:</strong> {data.datainici}</p>
+              <p><strong>Fecha de fin:</strong> {data.datafi}</p>
+        </div>
         <Box height={75}/>
           <Box sx={{ maxWidth: '80vw', margin: '0 auto', alignItems: 'center', width: '60%'}}>
             <div style={{ height: '100%', width: '100%', minHeight:'100px' }}>
@@ -104,4 +141,4 @@ const Videojocs = () => {
   )
 }
 
-export default Videojocs;
+export default MiSubscripcio;

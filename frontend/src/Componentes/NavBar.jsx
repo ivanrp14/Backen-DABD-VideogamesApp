@@ -57,7 +57,7 @@ export default function Navbar() {
   // Fetch logout
   const logoutEP = async () => {
     localStorage.clear();
-    window.location.reload();// enviamos al login nuevamente
+    navigate("/");// enviamos al login nuevamente
   }
 
 
@@ -84,7 +84,7 @@ export default function Navbar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={()=> {navigate("/MiPerfil")}}>Perfil</MenuItem>
+      <MenuItem onClick={()=> {navigate("/Perfil")}}>Perfil</MenuItem>
       <MenuItem onClick={handleCerrarSesionClick}>Cerrar Sesion</MenuItem>
     </Menu>
   );

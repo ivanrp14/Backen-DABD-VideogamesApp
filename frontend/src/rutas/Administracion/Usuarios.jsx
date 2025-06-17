@@ -5,9 +5,39 @@ import SidenavUsuari from "../../Componentes/Sidenav/UsuariSidenav";
 import Navbar from '../../Componentes/NavBar';
 const BASE_URL = 'http://localhost:8000';
 
-const Videojocs = () => {
+const Usuarios = () => {
   const [rows, setRows] = useState([])
+  const eliminarUsuari = async (sobrenom) => {
+  try {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const accessToken = token?.access_token;
+    if (!accessToken) throw new Error("No hay token de acceso");
+
+    const response = await fetch(`http://localhost:8000/usuaris/${sobrenom}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) throw new Error("Error al eliminar el usuario");
+
+    console.log(`Usuario ${sobrenom} eliminado correctamente`);
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
   const columns = [
+    {
+      field: 'sobrenom',
+      headerName: 'Username',
+      width: 200,
+      editable: false
+    },
     {
       field: 'Nom',
       headerName: 'Nombre',
@@ -15,38 +45,41 @@ const Videojocs = () => {
       editable: false
     },
     {
-      field: 'Descripcio',
-      headerName: 'Descripcion',
+      field: 'correuelectronic',
+      headerName: 'Correo electronico',
       width: 200,
       editable: false
     },
     {
-      field: 'preu',
-      headerName: 'Precio',
+      field: 'datanaixement',
+      headerName: 'Fecha de nacimiento',
       width: 150,
       editable: false
-    },
-    {
-      field: 'data',
-      headerName: 'Fecha de lanzamiento',
-      width: 250,
-      editable: false
-    },
-    {
-      field: 'edat',
-      headerName: 'Qualificacion por edat',
-      width: 150,
-      editable: false
-    },
-    {
-      field: 'desenvolupador',
-      headerName: 'Desarrollador',
-      width: 370,
-      editable: false
-    }
+    },{
+  field: 'acciones',
+  headerName: 'Acciones',
+  width: 150,
+  renderCell: (params) => (
+    <button
+      onClick={async () => {
+        const confirmado = window.confirm(`¿Eliminar a ${params.row.sobrenom}?`);
+        if (confirmado) {
+          const exito = await eliminarUsuari(params.row.sobrenom);
+          if (exito) {
+            setRows((prev) => prev.filter(row => row.sobrenom !== params.row.sobrenom));
+          }
+        }
+      }}
+      style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}
+    >
+      Eliminar
+    </button>
+  )
+}
+
   ];
   useEffect(() => {
-    const getVideojocs = async (event) => {
+    const getUsuarios = async (event) => {
       try {
         const accessToken = localStorage.getItem("token");
         const sobrenom = localStorage.getItem("sobrenom");
@@ -60,7 +93,7 @@ const Videojocs = () => {
         })
 
       if (!response.ok) {
-        throw new Error("Error al obtener los videojuegos");
+        throw new Error("Error al obtener los usuarios");
       }
 
       const data = await response.json();
@@ -75,7 +108,7 @@ const Videojocs = () => {
     }
   };
 
-  getVideojocs();
+    getUsuarios();
 }, []);
   return (
     <>
@@ -84,7 +117,7 @@ const Videojocs = () => {
     <Box sx={{  display: 'flex'}}>
       <SidenavUsuari/>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <h1>Biblioteca</h1>
+        <h1>Usuarios</h1>
         <Box height={75}/>
           <Box sx={{ maxWidth: '80vw', margin: '0 auto', alignItems: 'center', width: '60%'}}>
             <div style={{ height: '100%', width: '100%', minHeight:'100px' }}>
@@ -104,4 +137,4 @@ const Videojocs = () => {
   )
 }
 
-export default Videojocs;
+export default Usuarios;

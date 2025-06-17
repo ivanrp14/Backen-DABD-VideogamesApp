@@ -8,6 +8,7 @@ import Sidenav from '../../Componentes/Sidenav/UsuariSidenav';
 import './perfil.css'
 import {AiOutlineMail, AiOutlinePhone} from 'react-icons/ai'
 import Navbar from '../../Componentes/NavBar';
+import { AiOutlineCalendar } from 'react-icons/ai';
 
 export default function MiPerfil() {
   const BASE_URL = 'http://localhost:8000';
@@ -19,11 +20,10 @@ export default function MiPerfil() {
 
   useEffect(() => {
     const getPerfil = async () => {
-      const token = JSON.parse(localStorage.getItem("token"));
-      const accessToken = token.access_token;
+      const accessToken = localStorage.getItem("token");
       console.log(accessToken);
       try {
-        const response = await fetch(`${BASE_URL}/perfil`, {
+        const response = await fetch(`${BASE_URL}/auth/get-user`, {
           method: 'GET',
           headers: {
             "Authorization": `Bearer ${accessToken}`
@@ -35,11 +35,11 @@ export default function MiPerfil() {
         }
         const data = await response.json();
         console.log(data)
-        setUsername(data.username)
-        setNombre(data.nombre)
+        setUsername(data.sobrenom)
+        setNombre(data.nom)
         setContrasenya(data.contrasenya)
         setdataNaixement(data.datanaixement)
-        setEmail(data.email)
+        setEmail(data.correuelectronic)
       } catch (error) {
         console.error('Error al obtener mi perfil:', error);
       }
@@ -60,8 +60,9 @@ export default function MiPerfil() {
             <div className="perfil-box">
               <img width="100px" src="https://robohash.org/propietario"></img>
               <div>
-                <h3>@{username} </h3>
-                <p className="perfil-nombre">{nombre}</p>
+                <h3>Username:@{username} </h3>
+                <p className="perfil-nombre">Nombre: {nombre}</p>
+                <p><AiOutlineCalendar /> Fecha de nacimiento: {new Date(datanaixement).toLocaleDateString()}</p>
                 <p><AiOutlineMail/> {email}</p>
                 
               </div>

@@ -70,7 +70,8 @@ const LoginRegistro = () => {
     const data = await response.json();
     console.log(data)
     if (response.ok) {
-      localStorage.setItem("token", data.access_token);
+        localStorage.setItem("token",data.access_token);
+        localStorage.setItem("sobrenom", sobrenom.value); 
       console.log('Sesión iniciada. Redireccionando a la página de inicio...');
         console.log("Bienvenido")
         navigate("/Inicio"); // enviamos al incio

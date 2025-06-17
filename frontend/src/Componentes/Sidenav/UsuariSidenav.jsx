@@ -69,7 +69,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function SidenavClinica() {
+export default function Sidenav() {
   const theme = useTheme();
   //const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
@@ -121,7 +121,7 @@ export default function SidenavClinica() {
             disablePadding
             sx={{ display: "block" }}
             onClick={() => {
-              navigate("/Biblioteca");
+              navigate("/Inicio");
             }}
           >
             <ListItemButton
@@ -177,7 +177,7 @@ export default function SidenavClinica() {
             disablePadding
             sx={{ display: "block" }}
             onClick={() => {
-              navigate("/Subscripcions");
+              navigate("/MiSubscripcion");
             }}
           >
             <ListItemButton
