@@ -7,8 +7,9 @@ class VendaBase(BaseModel):
     usuarisobrenom: str
     elementvendaid: int
 
-class VendaCreate(VendaBase):
-    pass
+class VendaCreate(BaseModel):
+    usuarisobrenom: str
+    elementvendaid: int
 
 class VendaRead(VendaBase):
     class Config:

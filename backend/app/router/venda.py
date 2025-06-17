@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
@@ -6,34 +7,43 @@ from typing import List
 from app.database import get_db  # funció que retorna la sessió DB
 from app.models.venda import Venda
 from app.schemas.venda import VendaCreate, VendaRead
+from app.models.elementvenda import ElementVenda
+from datetime import datetime
+
 
 router = APIRouter(
     prefix="/vendes",
     tags=["Vendes"]
 )
+
+
 @router.post("/", response_model=VendaRead)
 def crear_venda(venda: VendaCreate, db: Session = Depends(get_db)):
-    # Comprovar si la venda ja existeix (clau primària composta)
+    # Comprovar si la venda ja existeix
     existing = db.query(Venda).filter(
         Venda.usuarisobrenom == venda.usuarisobrenom,
-        Venda.elementvendaid == venda.elementvendaid,
-        Venda.data == venda.data
+        Venda.elementvendaid == venda.elementvendaid
     ).first()
 
     if existing:
         raise HTTPException(status_code=400, detail="La venda ja existeix")
 
+    # Obtenir l'element venda per agafar el preu
+    element = db.query(ElementVenda).filter(ElementVenda.id == venda.elementvendaid).first()
+    if not element:
+        raise HTTPException(status_code=404, detail="L'element de venda no existeix")
+
     nova_venda = Venda(
-        data=venda.data,
-        preu=venda.preu,
+        data=datetime.now().date(),
+        preu=element.preu,  # Preu automàtic
         usuarisobrenom=venda.usuarisobrenom,
         elementvendaid=venda.elementvendaid
     )
+
     db.add(nova_venda)
     db.commit()
     db.refresh(nova_venda)
     return nova_venda
-
 
 @router.get("/", response_model=List[VendaRead])
 def llistar_vendes(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):

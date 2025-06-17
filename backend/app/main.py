@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.router import usuari, elementvenda, videojoc, dlc, venda, subscripcio,acces
+from app.router import usuari, elementvenda, videojoc, dlc, venda, subscripcio,acces, opinio, etiqueta
 from app.database import engine, Base
 from fastapi.middleware.cors import CORSMiddleware
 print("Iniciando app...")
@@ -28,3 +28,5 @@ app.include_router(venda.router)
 app.include_router(subscripcio.router)
 app.include_router(subscripcio.routerTipusSubs)
 app.include_router(acces.router)
+app.include_router(opinio.router)
+app.include_router(etiqueta.router)

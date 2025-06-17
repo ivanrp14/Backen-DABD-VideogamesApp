@@ -1,6 +1,7 @@
+# models/usuari.py
 from sqlalchemy import Column, String, Date
 from sqlalchemy.orm import relationship
-from app.database import Base  # asumiendo que Base está aquí
+from app.database import Base
 
 class Usuari(Base):
     __tablename__ = "usuari"
@@ -14,3 +15,5 @@ class Usuari(Base):
 
     vendes = relationship("Venda", back_populates="usuari", cascade="all, delete-orphan")
     subscripcions = relationship("Subscripcio", back_populates="usuari", cascade="all, delete-orphan")
+    opinions = relationship("Opinio", back_populates="usuari", cascade="all, delete-orphan")
+    etiquetes_com = relationship('EtiquetaCom', back_populates='usuari', cascade="all, delete-orphan")
