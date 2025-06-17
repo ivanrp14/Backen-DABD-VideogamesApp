@@ -7,10 +7,13 @@ from app.models.acces import Acces
 from app.database import get_db
 from app.schemas.acces import AccesCreate, AccesResponse
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/accessos",
+    tags=["Accessos"]
+)
 
 # Afegir accés (relacionar subscripció amb un joc)
-@router.post("/accessos/", response_model=AccesResponse)
+@router.post("/", response_model=AccesResponse)
 def afegir_acces(acces: AccesCreate, db: Session = Depends(get_db)):
     # Comprovar si ja existeix
     existent = db.query(Acces).filter_by(
@@ -27,7 +30,7 @@ def afegir_acces(acces: AccesCreate, db: Session = Depends(get_db)):
     return nou_acces
 
 # Eliminar accés
-@router.delete("/accessos/")
+@router.delete("/{tipusSubscripcioNom}/{elementVendaId}", response_model=dict)
 def eliminar_acces(tipusSubscripcioNom: str, elementVendaId: int, db: Session = Depends(get_db)):
     acces = db.query(Acces).filter_by(
         tipusSubscripcioNom=tipusSubscripcioNom,

@@ -17,6 +17,8 @@ class ElementVenda(Base):
     dlc = relationship("DLC", back_populates="elementvenda", uselist=False)
     vendes = relationship("Venda", back_populates="elementvenda")
     acces = relationship("Acces", back_populates="elementvenda")
+    opinions = relationship("Opinio", back_populates="elementvenda", cascade="all, delete-orphan")
+
 class Videojoc(Base):
     __tablename__ = "videojoc"
     __table_args__ = {'schema': 'practica'}
@@ -27,6 +29,8 @@ class Videojoc(Base):
 
     elementvenda = relationship("ElementVenda", back_populates="videojoc")
     dlcs = relationship("DLC", back_populates="videojoc_base")  # un videojoc pot tenir molts DLCs
+    etiquetes_com = relationship('EtiquetaCom', back_populates='videojoc')
+
 
 class DLC(Base):
     __tablename__ = "dlc"
