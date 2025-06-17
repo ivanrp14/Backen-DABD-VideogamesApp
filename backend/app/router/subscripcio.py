@@ -81,6 +81,7 @@ def obtenir_subscripcions_usuari(sobrenom: str, db: Session = Depends(get_db)):
     subscripcions = db.query(Subscripcio).filter(Subscripcio.usuarisobrenom == sobrenom).all()
     return subscripcions
 
+
 # Eliminar subscripció
 @router.delete("/{id}")
 def eliminar_subscripcio(id: int, db: Session = Depends(get_db)):

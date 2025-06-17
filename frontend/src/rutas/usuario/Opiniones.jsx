@@ -1,114 +1,120 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Box, Typography, Rating } from '@mui/material';
-import SidenavUsuari from "../../Componentes/Sidenav/UsuariSidenav";
+import { Box, Typography, Rating, Button } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import Navbar from '../../Componentes/NavBar';
+import Sidenav from '../../Componentes/Sidenav/UsuariSidenav';
 
 const BASE_URL = 'http://localhost:8000';
-const Opiniones = () => {
-  const [videojocs, setVideojocs] = useState([]);
-  const [opinions, setOpinions] = useState({});
 
- useEffect(() => {
-    const getVideojocs = async (event) => {
-      try {
-        const accessToken = localStorage.getItem("token");
-        const usuarisobrenom = localStorage.getItem("sobrenom");
+const OpinionsUsuari = () => {
+  const [opinions, setOpinions] = useState([]);
 
-        const response = await fetch(`${BASE_URL}/vendes/usuari/${usuarisobrenom}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${accessToken}`
-          }
-        })
-
-      if (!response.ok) {
-        throw new Error("Error al obtener los videojuegos");
-      }
-
-      const data = await response.json();
-      setVideojocs(data);
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  getVideojocs();
-}, []);
-
-  const handleOpinionChange = (id, field, value) => {
-    setOpinions(prev => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value }
-    }));
-  };
-
-  const enviarOpinion = async (idJoc) => {
-    const token = localStorage.getItem("token");
+  const fetchOpinions = async () => {
+    const accessToken = localStorage.getItem("token");
     const sobrenom = localStorage.getItem("sobrenom");
-    const opinion = opinions[idJoc];
-
-    if (!opinion?.text || !opinion?.valoracio) {
-      alert("Debes escribir una opinión y una valoración.");
-      return;
-    }
 
     try {
-      const response = await fetch(`${BASE_URL}/opinions`, {
-        method: 'POST',
+      const response = await fetch(`${BASE_URL}/opinions/user/${sobrenom}`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          usuarisobrenom: sobrenom,
-          videojoc_id: idJoc,
-          elementvendaid: opinion.text,
-          puntuacio: opinion.valoracio
-        })
+          'Authorization': `Bearer ${accessToken}`
+        }
       });
 
-      if (!response.ok) throw new Error("Error al enviar la opinión");
-      alert("Opinión enviada correctamente");
+      if (!response.ok) throw new Error("Error al obtener las reseñas");
+
+      const data = await response.json();
+
+      const rowsConId = data.map((item) => ({
+        id: item.id,
+        opinion: item.textopinio,
+        puntuacio: item.puntuacio,
+        videojocId: item.elementvendaid,
+        data: item.datapublicacio,
+        usuari: item.usuarisobrenom
+      }));
+
+      setOpinions(rowsConId);
     } catch (error) {
       console.error(error);
-      alert("Error al enviar la opinión");
     }
   };
 
+  useEffect(() => {
+    fetchOpinions();
+  }, []);
+
+  const handleDeleteOpinion = async (id) => {
+    const accessToken = localStorage.getItem("token");
+
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta reseña?")) return;
+
+    try {
+      const response = await fetch(`${BASE_URL}/opinions/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      if (!response.ok) throw new Error("Error al eliminar la reseña");
+
+      // Actualizar el estado quitando la opinión eliminada
+      setOpinions((prev) => prev.filter((op) => op.id !== id));
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo eliminar la opinión");
+    }
+  };
+
+  const columns = [
+    { field: 'videojocId', headerName: 'ID del videojoc', width: 150 },
+    { field: 'opinion', headerName: 'Opinión', width: 300 },
+    {
+      field: 'puntuacio',
+      headerName: 'Valoración',
+      width: 150,
+      renderCell: (params) => (
+        <Rating value={params.value} readOnly />
+      )
+    },
+    { field: 'data', headerName: 'Fecha', width: 150 },
+    { field: 'usuari', headerName: 'Usuario', width: 150 },
+    {
+      field: 'acciones',
+      headerName: 'Acciones',
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={() => handleDeleteOpinion(params.row.id)}
+        >
+          Eliminar
+        </Button>
+      )
+    }
+  ];
+
   return (
-    
-    <Box sx={{ p: 4 }}>
-        <Navbar/>
-        <SidenavUsuari/>
-      <Typography variant="h4" gutterBottom>Opiniones sobre tus videojuegos</Typography>
-      {videojocs.map((joc) => (
-        <Box key={joc.id} sx={{ mb: 4, border: '1px solid #ccc', p: 2, borderRadius: 2 }}>
-          <Typography variant="h6">{joc.Nom}</Typography>
-          <TextField
-            label="Tu opinión"
-            multiline
-            fullWidth
-            rows={3}
-            value={opinions[joc.id]?.text || ''}
-            onChange={(e) => handleOpinionChange(joc.id, 'text', e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-            <Rating
-              name={`valoracio-${joc.id}`}
-              value={opinions[joc.id]?.valoracio || 0}
-              onChange={(event, newValue) => handleOpinionChange(joc.id, 'valoracio', newValue)}
-            />
-            <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => enviarOpinion(joc.id)}>
-              Enviar
-            </Button>
-          </Box>
-        </Box>
-      ))}
+    <Box sx={{ width: '70%', margin: 'auto', mt: 4 }}>
+      <Sidenav/>
+      <Navbar/>
+      <Typography variant="h4" gutterBottom>
+        Reseñas del usuario
+      </Typography>
+      <div style={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={opinions}
+          columns={columns}
+          pageSize={5}
+          disableRowSelectionOnClick
+        />
+      </div>
     </Box>
   );
 };
 
-export default Opiniones;
+export default OpinionsUsuari;
+
+

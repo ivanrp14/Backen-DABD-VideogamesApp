@@ -9,11 +9,6 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-/*import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Collapse from "@mui/material/Collapse";
-*/
-
 import { FaHome } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { usoAppInstance } from "../../appInstance";
@@ -223,7 +218,35 @@ export default function Sidenav() {
               >
                 <FaHome />
               </ListItemIcon>
-              <ListItemText primary="Opinion" sx={{ opacity: open ? 1 : 0 }} />
+              <ListItemText primary="Reseñas" sx={{ opacity: open ? 1 : 0 }} />
+            </ListItemButton>
+          </ListItem>
+
+
+          <ListItem
+            disablePadding
+            sx={{ display: "block" }}
+            onClick={() => {
+              navigate("/Etiquetas");
+            }}
+          >
+            <ListItemButton
+              sx={{
+                minHeight: 48,
+                justifyContent: open ? "initial" : "center",
+                px: 2.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: open ? 3 : "auto",
+                  justifyContent: "center",
+                }}
+              >
+                <FaHome />
+              </ListItemIcon>
+              <ListItemText primary="Etiquetas" sx={{ opacity: open ? 1 : 0 }} />
             </ListItemButton>
           </ListItem>
 

@@ -102,7 +102,7 @@ const Videojocs = () => {
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <h1>Tienda</h1>
           <Box height={75} />
-          <Box sx={{ maxWidth: '80vw', margin: '0 auto', width: '60%' }}>
+          <Box sx={{ Width: '80vw', margin: '0 auto', width: '100%' }}>
             <div style={{ height: '100%', width: '100%', minHeight: '100px' }}>
               <DataGrid
                 rows={rows}

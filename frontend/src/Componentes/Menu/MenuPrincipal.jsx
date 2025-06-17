@@ -5,6 +5,7 @@ import Subscripcion from '../../rutas/usuario/MiSubscripcion'
 import Videojuegos from'../../rutas/usuario/Videojuegos'
 import Usuarios  from '../../rutas/Administracion/Usuarios'
 import Opiniones from '../../rutas/usuario/Opiniones'
+import Etiquetes from '../../rutas/usuario/Etiquetas'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import LoginRegistro from '../Login/LoginRegistro'
 
@@ -19,6 +20,7 @@ return(
                 <Route path='/Comprar' element= {<Videojuegos/>}/>
                 <Route path='/Admin/Usuarios' element= {<Usuarios/>}/>
                 <Route path='/Opinion' element= {<Opiniones/>}/>
+                <Route path='/Etiquetas' element= {<Etiquetes/>}/>
             </Route>    
         <Route path='/' element = {<LoginRegistro/>}/>    
         </Routes>

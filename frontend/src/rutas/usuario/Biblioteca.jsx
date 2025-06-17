@@ -16,28 +16,30 @@ const Videojocs = () => {
   const [opinionText, setOpinionText] = useState('');
   const [valoracio, setValoracio] = useState(0);
 
-  const columns = [
-    { field: 'Nom', headerName: 'Nombre', width: 200 },
-    { field: 'Descripcio', headerName: 'Descripcion', width: 200 },
-    { field: 'preu', headerName: 'Precio', width: 150 },
-    { field: 'data', headerName: 'Fecha de lanzamiento', width: 250 },
-    { field: 'edat', headerName: 'Qualificacion por edat', width: 150 },
-    { field: 'desenvolupador', headerName: 'Desarrollador', width: 250 },
-    {
-      field: 'accion',
-      headerName: 'Acción',
-      width: 150,
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => handleOpenDialog(params.row)}
-        >
-          Opinar
-        </Button>
-      )
-    }
-  ];
+const columns = [
+  { field: 'nom', headerName: 'Nombre', width: 200 },
+  { field: 'descripcio', headerName: 'Descripción', width: 200 },
+  { field: 'preu', headerName: 'Precio', width: 150 },
+  { field: 'datallancament', headerName: 'Fecha de lanzamiento', width: 250 },
+  { field: 'qualificacioedat', headerName: 'Calificación por edad', width: 150 },
+  { field: 'desenvolupador', headerName: 'Desarrollador', width: 250 },
+  { field: 'tipus', headerName: 'Tipo', width: 250 },
+  {
+    field: 'accion',
+    headerName: 'Acción',
+    width: 150,
+    renderCell: (params) => (
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => handleOpenDialog(params.row)}
+      >
+        Opinar
+      </Button>
+    )
+  }
+];
+
 
   useEffect(() => {
     const getVideojocs = async () => {
@@ -45,7 +47,7 @@ const Videojocs = () => {
         const accessToken = localStorage.getItem("token");
         const usuarisobrenom = localStorage.getItem("sobrenom");
 
-        const response = await fetch(`${BASE_URL}/vendes/usuari/${usuarisobrenom}`, {
+        const response = await fetch(`${BASE_URL}/products/user/${usuarisobrenom}/accessos`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -56,7 +58,7 @@ const Videojocs = () => {
         if (!response.ok) throw new Error("Error al obtener los videojuegos");
 
         const data = await response.json();
-        const rowsConId = data.map((item, index) => ({ id: index, ...item }));
+        const rowsConId = data.products.map((item, index) => ({ id: index, ...item }));
         setRows(rowsConId);
 
       } catch (error) {
@@ -80,8 +82,7 @@ const Videojocs = () => {
   };
 
   const enviarOpinion = async () => {
-    const token = JSON.parse(localStorage.getItem("token"));
-    const accessToken = token?.access_token;
+    const accessToken = localStorage.getItem("token");
     const sobrenom = localStorage.getItem("sobrenom");
 
     if (!opinionText || !valoracio) {
@@ -97,10 +98,10 @@ const Videojocs = () => {
           'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
-          usuari_sobrenom: sobrenom,
-          videojoc_id: selectedJoc.idvideojoc,
-          text: opinionText,
-          valoracio: valoracio
+          usuarisobrenom: sobrenom,
+          elementvendaid: selectedJoc.id,
+          textopinio: opinionText,
+          puntuacio: valoracio
         })
       });
 
@@ -122,7 +123,7 @@ const Videojocs = () => {
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <h1>Biblioteca</h1>
           <Box height={75} />
-          <Box sx={{ maxWidth: '80vw', margin: '0 auto', width: '80%' }}>
+          <Box sx={{ maxWidth: '90vw', margin: '0 auto', width: '100%' }}>
             <div style={{ height: '100%', width: '100%', minHeight: '100px' }}>
               <DataGrid
                 rows={rows}
@@ -138,7 +139,7 @@ const Videojocs = () => {
       </Box>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Escribe tu opinión sobre {selectedJoc?.Nom}</DialogTitle>
+        <DialogTitle>Escribe tu opinión sobre {selectedJoc?.nom}</DialogTitle>
         <DialogContent>
           <TextField
             label="Opinión"

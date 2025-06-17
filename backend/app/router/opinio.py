@@ -10,7 +10,7 @@ router = APIRouter(
     prefix="/opinions",
     tags=["opinions"]
 )
-
+#Crear reseña
 @router.post("/", response_model=schemas.Opinio)
 def create_opinio(opinio: schemas.OpinioCreate, db: Session = Depends(get_db)):
     has_purchased = crud.has_purchased_game(db, opinio.usuarisobrenom, opinio.elementvendaid)
