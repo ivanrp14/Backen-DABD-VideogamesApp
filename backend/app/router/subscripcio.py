@@ -1,9 +1,11 @@
+from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.crud import subscripcio as crud_tipus
 from app.models.acces import Acces
 from app.models.elementvenda import ElementVenda
-from app.models.subscripcio import Subscripcio
+from app.models.subscripcio import Subscripcio, TipusSubscripcio
+from app.models.usuari import Usuari
 from app.schemas.elementvenda import ElementVendaBase
 from app.schemas.subscripcio import SubscripcioCreate, SubscripcioResponse, TipusSubscripcioCreate, TipusSubscripcioResponse
 from app.database import get_db
@@ -39,25 +41,48 @@ def obtenir_elements_per_subscripcio(tipussubscripcionom: str, db: Session = Dep
     )
     return elements
 
-r = APIRouter()
 
 # Crear subscripció
-@router.post("/subscripcions/", response_model=SubscripcioResponse)
+@router.post("/", response_model=SubscripcioResponse)
 def crear_subscripcio(subscripcio: SubscripcioCreate, db: Session = Depends(get_db)):
-    nova_subscripcio = Subscripcio(**subscripcio.dict())
+    # Comprovar que l'usuari existeix
+    usuari = db.query(Usuari).filter(Usuari.sobrenom == subscripcio.usuarisobrenom).first()
+    if not usuari:
+        raise HTTPException(status_code=404, detail="L'usuari no existeix")
+
+    # Comprovar que el tipus de subscripció existeix
+    tipus = db.query(TipusSubscripcio).filter(TipusSubscripcio.nom == subscripcio.tipussubscripcionom).first()
+    if not tipus:
+        raise HTTPException(status_code=404, detail="El tipus de subscripció no existeix")
+
+   
+
+    # Assignar dates automàticament
+    data_inici = date.today()
+    data_fi = data_inici + timedelta(days=30)
+
+    nova_subscripcio = Subscripcio(
+        usuarisobrenom=subscripcio.usuarisobrenom,
+        datainici=data_inici,
+        datafi=data_fi,
+        tipussubscripcionom=subscripcio.tipussubscripcionom,
+        activa=True
+    )
+
     db.add(nova_subscripcio)
     db.commit()
     db.refresh(nova_subscripcio)
+
     return nova_subscripcio
 
 # Obtenir subscripcions d’un usuari
-@router.get("/subscripcions/usuari/{sobrenom}", response_model=list[SubscripcioResponse])
+@router.get("/usuari/{sobrenom}", response_model=list[SubscripcioResponse])
 def obtenir_subscripcions_usuari(sobrenom: str, db: Session = Depends(get_db)):
-    subscripcions = db.query(Subscripcio).filter(Subscripcio.usuariSobrenom == sobrenom).all()
+    subscripcions = db.query(Subscripcio).filter(Subscripcio.usuarisobrenom == sobrenom).all()
     return subscripcions
 
 # Eliminar subscripció
-@router.delete("/subscripcions/{id}")
+@router.delete("/{id}")
 def eliminar_subscripcio(id: int, db: Session = Depends(get_db)):
     subscripcio = db.query(Subscripcio).filter(Subscripcio.id == id).first()
     if not subscripcio:
@@ -66,17 +91,47 @@ def eliminar_subscripcio(id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"missatge": "Subscripció eliminada correctament"}
 
-# Obtenir jocs accessibles per una subscripció
-@router.get("/subscripcions/{id}/jocs")
-def obtenir_jocs_subscripcio(id: int, db: Session = Depends(get_db)):
+
+
+@router.put("/{id}/cancelar")
+def cancelar_subscripcio(id: int, db: Session = Depends(get_db)):
     subscripcio = db.query(Subscripcio).filter(Subscripcio.id == id).first()
+
     if not subscripcio:
         raise HTTPException(status_code=404, detail="Subscripció no trobada")
-    
-    jocs = (
-        db.query(ElementVenda)
-        .join(Acces, Acces.elementVendaId == ElementVenda.id)
-        .filter(Acces.tipusSubscripcioNom == subscripcio.tipusSubscripcioNom)
-        .all()
-    )
-    return jocs
+
+    if not subscripcio.activa:
+        raise HTTPException(status_code=400, detail="La subscripció ja està cancel·lada")
+
+    subscripcio.activa = False
+    db.commit()
+
+    return {"missatge": "Subscripció cancel·lada correctament"}
+
+from datetime import date
+
+@router.get("/{id}/comprovar")
+def comprovar_subscripcio(id: int, db: Session = Depends(get_db)):
+    subscripcio = db.query(Subscripcio).filter(Subscripcio.id == id).first()
+
+    if not subscripcio:
+        raise HTTPException(status_code=404, detail="Subscripció no trobada")
+
+    avui = date.today()
+    estat_correcte = subscripcio.activa and avui <= subscripcio.datafi
+
+    if estat_correcte:
+        return {"missatge": "La subscripció està activa i correcta."}
+
+    # Si la subscripció està malament a la base de dades, la corregim
+    if subscripcio.activa and avui > subscripcio.datafi:
+        subscripcio.activa = False
+        db.commit()
+        return {"missatge": "La subscripció estava incorrectament activa i s'ha corregit a inactiva."}
+
+    if not subscripcio.activa and avui <= subscripcio.datafi:
+        subscripcio.activa = True
+        db.commit()
+        return {"missatge": "La subscripció estava incorrectament inactiva i s'ha corregit a activa."}
+
+    return {"missatge": "La subscripció està inactiva i correcta."}

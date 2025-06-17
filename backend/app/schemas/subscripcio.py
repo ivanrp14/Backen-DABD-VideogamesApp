@@ -17,11 +17,10 @@ class TipusSubscripcioResponse(TipusSubscripcioBase):
         orm_mode = True
 
 class SubscripcioBase(BaseModel):
-    usuariSobrenom: str
-    dataInici: date
-    dataFi: Optional[date] = None
-    tipusSubscripcioNom: str
-    activa: Optional[bool] = True
+    usuarisobrenom: str
+    
+    tipussubscripcionom: str
+    
 
 class SubscripcioCreate(SubscripcioBase):
     pass
