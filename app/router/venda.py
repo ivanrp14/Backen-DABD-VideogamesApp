@@ -5,16 +5,19 @@ from typing import List
 
 # Suposo que tens configurada la base de dades i sessió:
 from app.database import get_db  # funció que retorna la sessió DB
+from app.models.elementvenda import DLC, ElementVenda
+from datetime import datetime
+
 from app.models.venda import Venda
 from app.schemas.venda import VendaCreate, VendaRead
-from app.models.elementvenda import ElementVenda
-from datetime import datetime
 
 
 router = APIRouter(
     prefix="/vendes",
     tags=["Vendes"]
 )
+
+
 
 
 @router.post("/", response_model=VendaRead)
@@ -28,14 +31,33 @@ def crear_venda(venda: VendaCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="La venda ja existeix")
 
-    # Obtenir l'element venda per agafar el preu
+    # Obtenir l'element de venda
     element = db.query(ElementVenda).filter(ElementVenda.id == venda.elementvendaid).first()
     if not element:
         raise HTTPException(status_code=404, detail="L'element de venda no existeix")
 
+    # Si l'element és un DLC, comprovar que l'usuari tingui el videojoc base
+    if element.tipus.lower() == "dlc":
+        dlc = db.query(DLC).filter(DLC.elementvendaid == venda.elementvendaid).first()
+        if not dlc:
+            raise HTTPException(status_code=404, detail="El DLC no existeix")
+
+        # Comprovar si l'usuari té el videojoc base comprat
+        videojoc_comprat = db.query(Venda).filter(
+            Venda.usuarisobrenom == venda.usuarisobrenom,
+            Venda.elementvendaid == dlc.videojocbaseid
+        ).first()
+
+        if not videojoc_comprat and not dlc.esgratuit:
+            raise HTTPException(
+                status_code=400,
+                detail="Per comprar aquest DLC, has de tenir el videojoc base comprat"
+            )
+
+    # Crear la nova venda
     nova_venda = Venda(
         data=datetime.now().date(),
-        preu=element.preu,  # Preu automàtic
+        preu=element.preu,
         usuarisobrenom=venda.usuarisobrenom,
         elementvendaid=venda.elementvendaid
     )
