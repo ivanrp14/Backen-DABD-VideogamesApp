@@ -200,6 +200,33 @@ export default function Sidenav() {
             </ListItemButton>
           </ListItem>
 
+          <ListItem
+            disablePadding
+            sx={{ display: "block" }}
+            onClick={() => {
+              navigate("/Opinion");
+            }}
+          >
+            <ListItemButton
+              sx={{
+                minHeight: 48,
+                justifyContent: open ? "initial" : "center",
+                px: 2.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: open ? 3 : "auto",
+                  justifyContent: "center",
+                }}
+              >
+                <FaHome />
+              </ListItemIcon>
+              <ListItemText primary="Opinion" sx={{ opacity: open ? 1 : 0 }} />
+            </ListItemButton>
+          </ListItem>
+
         </List>
         <Divider />
       </Drawer>

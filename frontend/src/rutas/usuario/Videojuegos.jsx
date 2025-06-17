@@ -12,20 +12,23 @@ const Videojocs = () => {
 
   const comprarVideojoc = async (videojocId) => {
     try {
-      const token = JSON.parse(localStorage.getItem("token"));
-      const accessToken = token?.access_token;
-
+      const accessToken = localStorage.getItem("token");
+      const sobrenom = localStorage.getItem("sobrenom");
       if (!accessToken) {
         alert("Debes iniciar sesión para comprar.");
         return;
       }
 
-      const response = await fetch(`${BASE_URL}/comprar/${videojocId}`, {
+      const response = await fetch(`${BASE_URL}/vendes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
-        }
+        },
+        body: JSON.stringify({
+          usuarisobrenom:sobrenom,
+          elementvendaid:videojocId
+        })
       });
 
       if (!response.ok) throw new Error("Error al realizar la compra");
@@ -37,13 +40,15 @@ const Videojocs = () => {
     }
   };
 
+
   const columns = [
-    { field: 'Nom', headerName: 'Nombre', width: 200 },
-    { field: 'Descripcio', headerName: 'Descripcion', width: 200 },
+    { field: 'nom', headerName: 'Nombre', width: 200 },
+    { field: 'descripcio', headerName: 'Descripcion', width: 200 },
     { field: 'preu', headerName: 'Precio', width: 150 },
-    { field: 'data', headerName: 'Fecha de lanzamiento', width: 250 },
-    { field: 'edat', headerName: 'Qualificacion por edat', width: 150 },
+    { field: 'datallancament', headerName: 'Fecha de lanzamiento', width: 250 },
+    { field: 'qualificacioedat', headerName: 'Qualificacion por edat', width: 150 },
     { field: 'desenvolupador', headerName: 'Desarrollador', width: 200 },
+    { field: 'tipus', headerName: 'tipus', width: 200 },
     {
       field: 'acciones',
       headerName: '',
@@ -63,8 +68,8 @@ const Videojocs = () => {
   useEffect(() => {
     const getVideojocs = async () => {
       try {
-        const accessToken = JSON.parse(localStorage.getItem("token"))?.access_token;
-        const response = await fetch(`${BASE_URL}/productes`, {
+        const accessToken = localStorage.getItem("token");
+        const response = await fetch(`${BASE_URL}/products/by-date`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -77,7 +82,7 @@ const Videojocs = () => {
         }
 
         const data = await response.json();
-        const rowsConId = data.map((item, index) => ({ id: item.id || index, ...item }));
+        const rowsConId = data.products.map((item, index) => ({ id: item.id || index, ...item }));
         setRows(rowsConId);
 
       } catch (error) {

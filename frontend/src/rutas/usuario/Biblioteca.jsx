@@ -1,93 +1,129 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import Box from '@mui/material/Box';
+import {
+  Box, Button, Dialog, DialogActions,
+  DialogContent, DialogTitle, TextField, Rating, Typography
+} from '@mui/material';
 import SidenavUsuari from "../../Componentes/Sidenav/UsuariSidenav";
 import Navbar from '../../Componentes/NavBar';
+
 const BASE_URL = 'http://localhost:8000';
 
 const Videojocs = () => {
-  const [rows, setRows] = useState([])
+  const [rows, setRows] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedJoc, setSelectedJoc] = useState(null);
+  const [opinionText, setOpinionText] = useState('');
+  const [valoracio, setValoracio] = useState(0);
+
   const columns = [
+    { field: 'Nom', headerName: 'Nombre', width: 200 },
+    { field: 'Descripcio', headerName: 'Descripcion', width: 200 },
+    { field: 'preu', headerName: 'Precio', width: 150 },
+    { field: 'data', headerName: 'Fecha de lanzamiento', width: 250 },
+    { field: 'edat', headerName: 'Qualificacion por edat', width: 150 },
+    { field: 'desenvolupador', headerName: 'Desarrollador', width: 250 },
     {
-      field: 'Nom',
-      headerName: 'Nombre',
-      width: 200,
-      editable: false
-    },
-    {
-      field: 'Descripcio',
-      headerName: 'Descripcion',
-      width: 200,
-      editable: false
-    },
-    {
-      field: 'preu',
-      headerName: 'Precio',
+      field: 'accion',
+      headerName: 'Acción',
       width: 150,
-      editable: false
-    },
-    {
-      field: 'data',
-      headerName: 'Fecha de lanzamiento',
-      width: 250,
-      editable: false
-    },
-    {
-      field: 'edat',
-      headerName: 'Qualificacion por edat',
-      width: 150,
-      editable: false
-    },
-    {
-      field: 'desenvolupador',
-      headerName: 'Desarrollador',
-      width: 370,
-      editable: false
+      renderCell: (params) => (
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => handleOpenDialog(params.row)}
+        >
+          Opinar
+        </Button>
+      )
     }
   ];
+
   useEffect(() => {
-    const getVideojocs = async (event) => {
+    const getVideojocs = async () => {
       try {
         const accessToken = localStorage.getItem("token");
-        const sobrenom = localStorage.getItem("sobrenom");
+        const usuarisobrenom = localStorage.getItem("sobrenom");
 
-        const response = await fetch(`${BASE_URL}/vendes/usuari/${sobrenom}`, {
+        const response = await fetch(`${BASE_URL}/vendes/usuari/${usuarisobrenom}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            "Authorization": `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken}`
           }
-        })
+        });
 
-      if (!response.ok) {
-        throw new Error("Error al obtener los videojuegos");
+        if (!response.ok) throw new Error("Error al obtener los videojuegos");
+
+        const data = await response.json();
+        const rowsConId = data.map((item, index) => ({ id: index, ...item }));
+        setRows(rowsConId);
+
+      } catch (error) {
+        console.error(error);
       }
+    };
 
-      const data = await response.json();
-      console.log(data);
-      
-      // Si los objetos no tienen `id`, puedes generarlo temporalmente:
-      const rowsConId = data.map((item, index) => ({ id: index, ...item }));
-      setRows(rowsConId);
+    getVideojocs();
+  }, []);
 
+  const handleOpenDialog = (joc) => {
+    setSelectedJoc(joc);
+    setOpinionText('');
+    setValoracio(0);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedJoc(null);
+  };
+
+  const enviarOpinion = async () => {
+    const token = JSON.parse(localStorage.getItem("token"));
+    const accessToken = token?.access_token;
+    const sobrenom = localStorage.getItem("sobrenom");
+
+    if (!opinionText || !valoracio) {
+      alert("Debes escribir una opinión y una valoración.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/opinions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          usuari_sobrenom: sobrenom,
+          videojoc_id: selectedJoc.idvideojoc,
+          text: opinionText,
+          valoracio: valoracio
+        })
+      });
+
+      if (!response.ok) throw new Error("Error al enviar la opinión");
+      alert("Opinión enviada correctamente");
+      handleCloseDialog();
     } catch (error) {
       console.error(error);
+      alert("Error al enviar la opinión");
     }
   };
 
-  getVideojocs();
-}, []);
   return (
     <>
-    <Navbar/>
-    <Box height={40}/>
-    <Box sx={{  display: 'flex'}}>
-      <SidenavUsuari/>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <h1>Biblioteca</h1>
-        <Box height={75}/>
-          <Box sx={{ maxWidth: '80vw', margin: '0 auto', alignItems: 'center', width: '60%'}}>
-            <div style={{ height: '100%', width: '100%', minHeight:'100px' }}>
+      <Navbar />
+      <Box height={40} />
+      <Box sx={{ display: 'flex' }}>
+        <SidenavUsuari />
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <h1>Biblioteca</h1>
+          <Box height={75} />
+          <Box sx={{ maxWidth: '80vw', margin: '0 auto', width: '80%' }}>
+            <div style={{ height: '100%', width: '100%', minHeight: '100px' }}>
               <DataGrid
                 rows={rows}
                 columns={columns}
@@ -100,8 +136,35 @@ const Videojocs = () => {
           </Box>
         </Box>
       </Box>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Escribe tu opinión sobre {selectedJoc?.Nom}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Opinión"
+            multiline
+            rows={4}
+            fullWidth
+            value={opinionText}
+            onChange={(e) => setOpinionText(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <Box sx={{ mt: 2 }}>
+            <Typography component="legend">Valoración</Typography>
+            <Rating
+              name="valoracion"
+              value={valoracio}
+              onChange={(event, newValue) => setValoracio(newValue)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancelar</Button>
+          <Button variant="contained" onClick={enviarOpinion}>Enviar</Button>
+        </DialogActions>
+      </Dialog>
     </>
-  )
-}
+  );
+};
 
 export default Videojocs;
