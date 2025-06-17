@@ -48,4 +48,3 @@ migrations/
 dist/
 build/
 *.egg-info/
-/frontend/node_modules
